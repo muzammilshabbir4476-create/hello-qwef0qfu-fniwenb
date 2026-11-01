@@ -1,6 +1,7 @@
 streamlit
+tensorflow
+tensorflow-hub
+setuptools
 scipy
 numpy
-tensorflow
-librosa
 pandas
