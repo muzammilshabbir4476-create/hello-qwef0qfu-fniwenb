@@ -3,4 +3,6 @@ scipy
 numpy
 tensorflow
 tensorflow-hub
+setuptools
+librosa
 pandas
