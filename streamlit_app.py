@@ -155,7 +155,7 @@ def main():
     with st.sidebar:
         st.header('🎧 SoundSense')
         st.caption('Deep Learning Semester Project')
-        st.markdown('**Junaid Shahid**')
+        st.markdown('**Muhammad Muzammil**')
         st.divider()
         st.markdown('**The model listens for**')
         st.write(' · '.join(label.replace('_', ' ').title() for label in class_names))
