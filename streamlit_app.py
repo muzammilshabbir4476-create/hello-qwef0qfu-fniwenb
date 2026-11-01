@@ -1,8 +1,4 @@
-"""SoundSense Streamlit frontend and inference.
-
-Run from this folder with: streamlit run streamlit_app.py
-Deploy this .py file as the Streamlit Community Cloud entrypoint.
-"""
+"""SoundSense Streamlit frontend and inference with YAMNet feature extraction."""
 from pathlib import Path
 import hashlib
 import io
@@ -18,10 +14,9 @@ from scipy.io import wavfile
 from scipy.signal import resample_poly
 import streamlit as st
 import tensorflow as tf
-import librosa
+import tensorflow_hub as hub
 
 ROOT = Path(__file__).resolve().parent
-# Aapke GitHub par file root mein hai, isliye yeh path theek hai
 MODEL_PATH = ROOT / 'soundsense_head.keras' 
 SAMPLE_RATE = 16000
 SAMPLES = 80000
@@ -37,12 +32,15 @@ def read_json(path):
 
 
 @st.cache_resource(show_spinner=False)
-def load_trained_model():
-    """Load the trained Keras model safely across Streamlit reruns."""
+def load_models():
+    """Load both YAMNet from TF Hub and the trained Keras classification head."""
     if not MODEL_PATH.is_file():
         raise FileNotFoundError('soundsense_head.keras is missing. Upload it to your GitHub repository.')
-    model = tf.keras.models.load_model(str(MODEL_PATH))
-    return model
+    
+    classification_model = tf.keras.models.load_model(str(MODEL_PATH))
+    yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
+    
+    return classification_model, yamnet_model
 
 
 def preprocess_wav(content):
@@ -93,18 +91,11 @@ def preprocess_wav(content):
 
 def classify(waveform, audio_info, class_names):
     started = time.perf_counter()
-    model = load_trained_model()
+    classification_model, yamnet_model = load_models()
     
-    # Audio waveform ko 1024-dimensional feature vector mein convert karna (Model Normalization layer ke liye)
-    mel = librosa.feature.melspectrogram(y=waveform, sr=SAMPLE_RATE, n_mels=32, n_fft=2048, hop_length=2500)
-    features = librosa.power_to_db(mel, ref=np.max).flatten()
-    if len(features) >= 1024:
-        feature_vector = features[:1024]
-    else:
-        feature_vector = np.pad(features, (0, 1024 - len(features)))
-    
-    input_data = np.expand_dims(feature_vector, axis=0)
-    output = model.predict(input_data)
+    scores_ym, embeddings, spectrogram = yamnet_model(waveform)
+    mean_embedding = tf.reduce_mean(embeddings, axis=0, keepdims=True)
+    output = classification_model.predict(mean_embedding)
     
     if output.shape != (1, len(class_names)) or not np.isfinite(output).all():
         raise ValueError('The model returned an invalid result.')
@@ -168,7 +159,7 @@ def main():
         st.markdown('**The model listens for**')
         st.write(' · '.join(label.replace('_', ' ').title() for label in class_names))
         st.divider()
-        st.markdown('**Model**\n\nTrained Keras classification head')
+        st.markdown('**Model**\n\nFrozen YAMNet + trained 10-class head')
         st.caption('Mono audio · 16 kHz · first five seconds')
         st.link_button('Explore the ESC-10 dataset ↗', DATASET_URL, use_container_width=True)
 
