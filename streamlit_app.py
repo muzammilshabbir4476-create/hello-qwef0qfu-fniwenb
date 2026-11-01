@@ -37,10 +37,7 @@ def load_models():
     if not MODEL_PATH.is_file():
         raise FileNotFoundError('soundsense_head.keras is missing. Upload it to your GitHub repository.')
     
-    # Load trained classification head
     classification_model = tf.keras.models.load_model(str(MODEL_PATH))
-    
-    # Load frozen YAMNet model for feature extraction
     yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
     
     return classification_model, yamnet_model
@@ -96,13 +93,8 @@ def classify(waveform, audio_info, class_names):
     started = time.perf_counter()
     classification_model, yamnet_model = load_models()
     
-    # 1. Extract 1024-d embeddings using YAMNet
     scores_ym, embeddings, spectrogram = yamnet_model(waveform)
-    
-    # 2. Mean pooling across time frames to get [1, 1024] feature vector
     mean_embedding = tf.reduce_mean(embeddings, axis=0, keepdims=True)
-    
-    # 3. Pass features through trained classification head
     output = classification_model.predict(mean_embedding)
     
     if output.shape != (1, len(class_names)) or not np.isfinite(output).all():
