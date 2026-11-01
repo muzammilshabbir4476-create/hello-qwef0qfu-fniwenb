@@ -1,8 +1,8 @@
 streamlit
-scipy
-numpy
 tensorflow
 tensorflow-hub
 setuptools
-librosa
+scipy
+numpy
 pandas
+librosa
