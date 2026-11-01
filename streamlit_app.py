@@ -18,6 +18,7 @@ from scipy.io import wavfile
 from scipy.signal import resample_poly
 import streamlit as st
 import tensorflow as tf
+import librosa
 
 ROOT = Path(__file__).resolve().parent
 # Aapke GitHub par file root mein hai, isliye yeh path theek hai
@@ -94,8 +95,15 @@ def classify(waveform, audio_info, class_names):
     started = time.perf_counter()
     model = load_trained_model()
     
-    # Reshape waveform for model prediction if needed (e.g., adding batch dimension)
-    input_data = np.expand_dims(waveform, axis=0)
+    # Audio waveform ko 1024-dimensional feature vector mein convert karna (Model Normalization layer ke liye)
+    mel = librosa.feature.melspectrogram(y=waveform, sr=SAMPLE_RATE, n_mels=32, n_fft=2048, hop_length=2500)
+    features = librosa.power_to_db(mel, ref=np.max).flatten()
+    if len(features) >= 1024:
+        feature_vector = features[:1024]
+    else:
+        feature_vector = np.pad(features, (0, 1024 - len(features)))
+    
+    input_data = np.expand_dims(feature_vector, axis=0)
     output = model.predict(input_data)
     
     if output.shape != (1, len(class_names)) or not np.isfinite(output).all():
