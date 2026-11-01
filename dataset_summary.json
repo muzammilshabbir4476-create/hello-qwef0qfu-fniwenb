@@ -1,0 +1,60 @@
+{
+  "project": "SoundSense Environmental Sound Classification",
+  "source": "https://github.com/karolpiczak/ESC-50",
+  "subset": "ESC-10",
+  "total_clips": 400,
+  "classes": [
+    "chainsaw",
+    "clock_tick",
+    "crackling_fire",
+    "crying_baby",
+    "dog",
+    "helicopter",
+    "rain",
+    "rooster",
+    "sea_waves",
+    "sneezing"
+  ],
+  "split_rule": "original fold 1 test; fold 2 validation; folds 3-5 train",
+  "counts": {
+    "train": {
+      "chainsaw": 24,
+      "clock_tick": 24,
+      "crackling_fire": 24,
+      "crying_baby": 24,
+      "dog": 24,
+      "helicopter": 24,
+      "rain": 24,
+      "rooster": 24,
+      "sea_waves": 24,
+      "sneezing": 24
+    },
+    "validation": {
+      "chainsaw": 8,
+      "clock_tick": 8,
+      "crackling_fire": 8,
+      "crying_baby": 8,
+      "dog": 8,
+      "helicopter": 8,
+      "rain": 8,
+      "rooster": 8,
+      "sea_waves": 8,
+      "sneezing": 8
+    },
+    "test": {
+      "chainsaw": 8,
+      "clock_tick": 8,
+      "crackling_fire": 8,
+      "crying_baby": 8,
+      "dog": 8,
+      "helicopter": 8,
+      "rain": 8,
+      "rooster": 8,
+      "sea_waves": 8,
+      "sneezing": 8
+    }
+  },
+  "prepared_audio": "5 seconds, 16 kHz mono PCM16 WAV; scipy.signal.resample_poly",
+  "evaluation_note": "One fixed fold-based holdout, not a five-fold cross-validation average.",
+  "license": "ESC-10 subset: CC BY. See included source_information/LICENSE for clip attributions."
+}
