@@ -1,6 +1,0 @@
-streamlit
-scipy
-numpy
-tensorflow
-librosa
-pandas
